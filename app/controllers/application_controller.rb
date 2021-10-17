@@ -7,6 +7,11 @@ class ApplicationController < Sinatra::Base
     articles.to_json
   end
 
+  def index
+    comments = Comment.all
+    comments.to_json
+  end 
+
   get '/comment/new' do 
     erb :'comments/new'
   end 
@@ -17,20 +22,37 @@ class ApplicationController < Sinatra::Base
   end
 
   post '/comment' do
-    comments = Comment.create(params)
-    comments.to_json(include: :comments)
+    comments = Comment.create(comment_params).json
     # binding.pry
   end
 
   patch "/comment" do
-    comment = Comment.create(params)
+    comment = Comment.create(comment_params)
     comment.to_json
+  end
+
+  delete "/comment" do
+    comment = Comment.find(params[:id])
+    comment.destroy
+    render json: {message: 'this comment was deleted'}
   end
 
   # Add your routes here
   # get "/" do
   #   { message: "Good luck with your project!" }.to_json
   # end
+
+  private 
+
+  def comment_params
+    params.require(:comment).permit(:user, :comment)
+  end 
+
+  def comment_params2 
+    comment_params2 = %w(comment_text)
+    params.select {|param,value| allowed_params.include?(param)}
+  end
+
 
 end
 # 
